@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class CategoryServiceImpl implements CategoryService {
@@ -21,9 +22,9 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Override
     public CategoryDto createCategory(CategoryDto categoryDto) {
-        Category category = this.dtoToCategory(categoryDto);
+        Category category = this.modelMapper.map(categoryDto,Category.class);
         Category categorySave = this.categoryRepo.save(category);
-        return this.categoryToDto(categorySave);
+        return this.modelMapper.map(categorySave,CategoryDto.class);
     }
 
     @Override
@@ -32,32 +33,37 @@ public class CategoryServiceImpl implements CategoryService {
         category.setCategoryTitle(categoryDto.getCategoryTitle());
         category.setCategoryDescription(categoryDto.getCategoryDescription());
         Category save = this.categoryRepo.save(category);
-        return this.categoryToDto(save);
+        return this.modelMapper.map(save,CategoryDto.class);
     }
 
     @Override
     public void deleteCategory(Integer categoryId) {
-
+        Category category = this.categoryRepo.findById(categoryId).orElseThrow(()-> new ResourceNotFoundException("Category","Id",categoryId));
+        this.categoryRepo.delete(category);
     }
 
     @Override
     public List<CategoryDto> getAllCategory() {
-        return null;
+        List<Category> allCategory = this.categoryRepo.findAll();
+        List<CategoryDto> allCategoryDto = allCategory.stream().map((category)-> this.modelMapper.map(category,CategoryDto.class)).collect(Collectors.toList());
+        return allCategoryDto;
     }
 
     @Override
     public CategoryDto getSingleCategory(Integer categoryId) {
-        return null;
-    }
-
-    public Category dtoToCategory(CategoryDto categoryDto){
-        Category category = this.modelMapper.map(categoryDto,Category.class);
-        return category;
-    }
-
-    public CategoryDto categoryToDto(Category category){
+        Category category = this.categoryRepo.findById(categoryId).orElseThrow(()->new ResourceNotFoundException("Category","Id",categoryId));
         CategoryDto categoryDto = this.modelMapper.map(category,CategoryDto.class);
         return categoryDto;
     }
+
+//    public Category dtoToCategory(CategoryDto categoryDto){
+//        Category category = this.modelMapper.map(categoryDto,Category.class);
+//        return category;
+//    }
+//
+//    public CategoryDto categoryToDto(Category category){
+//        CategoryDto categoryDto = this.modelMapper.map(category,CategoryDto.class);
+//        return categoryDto;
+//    }
 
 }
