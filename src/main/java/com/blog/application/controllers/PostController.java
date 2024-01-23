@@ -1,7 +1,9 @@
 package com.blog.application.controllers;
 
+import com.blog.application.confiq.AppConstants;
 import com.blog.application.payloads.ApiResponse;
 import com.blog.application.payloads.PostDto;
+import com.blog.application.payloads.PostResponse;
 import com.blog.application.services.PostService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -46,12 +48,14 @@ public class PostController {
     }
 
     @GetMapping("/posts")
-    public ResponseEntity<List<PostDto>> getAllPosts(
-            @RequestParam(value = "pageNumber",defaultValue = "0",required = false) Integer pageNumber,
-            @RequestParam(value = "pageSize",defaultValue = "5",required = false) Integer pageSize){
+    public ResponseEntity<PostResponse> getAllPosts(
+            @RequestParam(value = "pageNumber",defaultValue = AppConstants.PAGE_NUMBER,required = false) Integer pageNumber,
+            @RequestParam(value = "pageSize",defaultValue = AppConstants.PAGE_SIZE,required = false) Integer pageSize,
+            @RequestParam(value = "sortBy",defaultValue = AppConstants.SORT_BY,required = false) String sortBy,
+            @RequestParam(value = "sortDir",defaultValue = AppConstants.SORT_DIR,required = false) String sortDir){
 
-        List<PostDto> allPosts = this.postService.getAllPost(pageNumber,pageSize);
-        return new ResponseEntity<List<PostDto>>(allPosts,HttpStatus.OK);
+        PostResponse postResponse = this.postService.getAllPost(pageNumber,pageSize,sortBy,sortDir);
+        return new ResponseEntity<PostResponse>(postResponse,HttpStatus.OK);
     }
 
     @GetMapping("/posts/{postId}")
@@ -64,6 +68,12 @@ public class PostController {
     public ApiResponse deletePost(@PathVariable Integer postId){
         this.postService.deletePost(postId);
         return new ApiResponse("The post is Deleted",true);
+    }
+
+    @GetMapping("/posts/search/{title}")
+    public ResponseEntity<List<PostDto>> searchPosts(@PathVariable String title){
+        List<PostDto> postDtos = this.postService.searchPosts(title);
+        return new ResponseEntity<List<PostDto>>(postDtos,HttpStatus.OK);
     }
 
 
