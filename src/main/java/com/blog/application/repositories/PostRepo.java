@@ -4,8 +4,7 @@ import com.blog.application.entities.Category;
 import com.blog.application.entities.Post;
 import com.blog.application.entities.User;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
+
 
 import java.util.List;
 
