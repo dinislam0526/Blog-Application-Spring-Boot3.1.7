@@ -37,7 +37,7 @@ public class UserController {
       return new ResponseEntity<ApiResponse>(new ApiResponse("User Deleted Successfully",true),HttpStatus.OK);
     }
 
-    @GetMapping("/")
+    @GetMapping("")
     public ResponseEntity<List<UserDto>> getAllUser(){
         return ResponseEntity.ok(this.userService.getAllUser());
     }
