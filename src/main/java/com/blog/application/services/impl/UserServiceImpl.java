@@ -4,24 +4,36 @@ import com.blog.application.entities.User;
 import com.blog.application.exceptions.ResourceNotFoundException;
 import com.blog.application.payloads.UserDto;
 import com.blog.application.repositories.UserRepo;
+import com.blog.application.security.UserDetail;
 import com.blog.application.services.UserService;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
-public class UserServiceImpl implements UserService {
+public class UserServiceImpl implements UserService, UserDetailsService {
 
     @Autowired
     private UserRepo userRepo;
 
     @Autowired
     private ModelMapper modelMapper;
+
+    @Autowired
+    private PasswordEncoder encoder;
+
     @Override
     public UserDto createUser(UserDto userDto) {
+        //only one new line
+        userDto.setPassword(encoder.encode(userDto.getPassword()));
         User user = this.dtoToUser(userDto);
         User userSave = this.userRepo.save(user);
         return this.userToDto(userSave);
@@ -81,6 +93,15 @@ public class UserServiceImpl implements UserService {
 
         UserDto userDto = this.modelMapper.map(user,UserDto.class);
         return userDto;
+    }
+
+    @Override
+    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+        Optional<User> userDetail = userRepo.findByName(username);
+
+        // Converting userDetail to UserDetails
+        return userDetail.map(UserDetail::new)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found " + username));
     }
 
 }
