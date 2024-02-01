@@ -97,10 +97,10 @@ public class UserServiceImpl implements UserService, UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        Optional<User> userDetail = userRepo.findByName(username);
+        Optional<User> user = userRepo.findByName(username);
 
-        // Converting userDetail to UserDetails
-        return userDetail.map(UserDetail::new)
+        // Converting user to UserDetails
+        return user.map(UserDetail::new)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found " + username));
     }
 

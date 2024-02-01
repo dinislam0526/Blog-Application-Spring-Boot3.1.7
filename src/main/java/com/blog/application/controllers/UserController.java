@@ -2,6 +2,7 @@ package com.blog.application.controllers;
 
 import com.blog.application.payloads.ApiResponse;
 import com.blog.application.payloads.AuthRequest;
+import com.blog.application.payloads.AuthResponse;
 import com.blog.application.payloads.UserDto;
 import com.blog.application.security.JwtService;
 import com.blog.application.services.UserService;
@@ -49,14 +50,14 @@ public class UserController {
       return new ResponseEntity<ApiResponse>(new ApiResponse("User Deleted Successfully",true),HttpStatus.OK);
     }
 
-    @GetMapping("")
+    @GetMapping("/admin")
     @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     public ResponseEntity<List<UserDto>> getAllUser(){
         return ResponseEntity.ok(this.userService.getAllUser());
     }
 
-    @GetMapping("/{userId}")
-    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
+    @GetMapping("/user/{userId}")
+    @PreAuthorize("hasAuthority('ROLE_USER')")
     public ResponseEntity<UserDto> getSingleUser(@PathVariable Integer userId){
         return ResponseEntity.ok(this.userService.getUserById(userId));
     }
@@ -81,13 +82,15 @@ public class UserController {
     }
 
     @PostMapping("/generateToken")
-    public String authenticateAndGetToken(@RequestBody AuthRequest authRequest) {
+    public AuthResponse authenticateAndGetToken(@RequestBody AuthRequest authRequest) {
         Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(authRequest.getUsername(), authRequest.getPassword()));
         if (authentication.isAuthenticated()) {
-            return jwtService.generateToken(authRequest.getUsername());
+            String token = jwtService.generateToken(authRequest.getUsername());
+            return new AuthResponse(token,true);
         } else {
             throw new UsernameNotFoundException("invalid user request !");
         }
+
     }
 
 }
