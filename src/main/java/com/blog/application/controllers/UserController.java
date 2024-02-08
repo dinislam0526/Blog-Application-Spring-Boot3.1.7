@@ -57,7 +57,7 @@ public class UserController {
     }
 
     @GetMapping("/user/{userId}")
-    @PreAuthorize("hasAuthority('ROLE_USER')")
+    @PreAuthorize("hasAuthority('NORMAL_USER')")
     public ResponseEntity<UserDto> getSingleUser(@PathVariable Integer userId){
         return ResponseEntity.ok(this.userService.getUserById(userId));
     }
@@ -70,7 +70,7 @@ public class UserController {
     }
 
     @GetMapping("/user/userProfile")
-    @PreAuthorize("hasAuthority('ROLE_USER')")
+    @PreAuthorize("hasAuthority('NORMAL_USER')")
     public String userProfile() {
         return "Welcome to User Profile";
     }
@@ -82,13 +82,15 @@ public class UserController {
     }
 
     @PostMapping("/generateToken")
-    public AuthResponse authenticateAndGetToken(@RequestBody AuthRequest authRequest) {
+    public AuthResponse authenticateAndGetToken(@RequestBody AuthRequest authRequest) throws Exception {
         Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(authRequest.getUsername(), authRequest.getPassword()));
         if (authentication.isAuthenticated()) {
             String token = jwtService.generateToken(authRequest.getUsername());
+            System.out.println("Exception not created");
             return new AuthResponse(token,true);
         } else {
-            throw new UsernameNotFoundException("invalid user request !");
+            System.out.println("Exception created");
+            throw new Exception("invalid user request !");
         }
 
     }

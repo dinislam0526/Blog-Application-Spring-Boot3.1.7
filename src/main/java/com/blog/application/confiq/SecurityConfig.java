@@ -5,6 +5,8 @@ import com.blog.application.services.impl.UserServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
@@ -30,6 +32,7 @@ public class SecurityConfig {
 
     // User Creation
     @Bean
+    @Primary
     public UserDetailsService userDetailsService() {
         return new UserServiceImpl();
     }
@@ -38,10 +41,11 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         return http.csrf((csrf)->csrf.disable())
-                .authorizeHttpRequests(auth-> auth.requestMatchers("/auth/welcome", "/auth/addNewUser", "/auth/generateToken","/api/**")
+                .authorizeHttpRequests(auth-> auth.requestMatchers("/auth/login","/auth/register","/auth/welcome", "/auth/addNewUser", "/auth/generateToken","/api/**")
                         .permitAll()
                         .requestMatchers("/auth/user/**").authenticated()
-                        .requestMatchers("/auth/admin/**").authenticated())
+                        .requestMatchers("/auth/admin/**").authenticated()
+                        .requestMatchers(HttpMethod.GET).permitAll())
                         .sessionManagement(session->session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                         .authenticationProvider(authenticationProvider())
                         .addFilterBefore(authFilter, UsernamePasswordAuthenticationFilter.class)

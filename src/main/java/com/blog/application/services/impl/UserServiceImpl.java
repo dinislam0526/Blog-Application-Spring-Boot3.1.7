@@ -1,8 +1,11 @@
 package com.blog.application.services.impl;
 
+import com.blog.application.confiq.AppConstants;
+import com.blog.application.entities.Role;
 import com.blog.application.entities.User;
 import com.blog.application.exceptions.ResourceNotFoundException;
 import com.blog.application.payloads.UserDto;
+import com.blog.application.repositories.RoleRepo;
 import com.blog.application.repositories.UserRepo;
 import com.blog.application.security.UserDetail;
 import com.blog.application.services.UserService;
@@ -28,12 +31,14 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     private ModelMapper modelMapper;
 
     @Autowired
-    private PasswordEncoder encoder;
+    private PasswordEncoder passwordEncoder;
+    @Autowired
+    private RoleRepo roleRepo;
 
     @Override
     public UserDto createUser(UserDto userDto) {
         //only one new line
-        userDto.setPassword(encoder.encode(userDto.getPassword()));
+        userDto.setPassword(passwordEncoder.encode(userDto.getPassword()));
         User user = this.dtoToUser(userDto);
         User userSave = this.userRepo.save(user);
         return this.userToDto(userSave);
@@ -69,6 +74,18 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     public void deleteUser(Integer userId) {
         User user = this.userRepo.findById(userId).orElseThrow(()-> new ResourceNotFoundException("user","Id",userId));
         this.userRepo.delete(user);
+    }
+
+    @Override
+    public UserDto registerUser(UserDto userDto) {
+      User user =  this.modelMapper.map(userDto,User.class);
+      //encoded the password
+      user.setPassword(this.passwordEncoder.encode(user.getPassword()));
+       //default role set
+        Role role = this.roleRepo.findById(AppConstants.NORMAL_USER).get();
+        user.getRoles().add(role);
+        User saveUser = this.userRepo.save(user);
+        return this.modelMapper.map(saveUser,UserDto.class);
     }
 
     private User dtoToUser(UserDto userDto){

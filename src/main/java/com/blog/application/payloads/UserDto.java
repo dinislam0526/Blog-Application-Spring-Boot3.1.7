@@ -1,6 +1,7 @@
 package com.blog.application.payloads;
 
 import com.blog.application.entities.Comment;
+import com.blog.application.entities.Role;
 import com.blog.application.entities.User;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotEmpty;
@@ -34,5 +35,7 @@ public class UserDto {
     private String about;
 
     private Set<CommentDto> comments = new HashSet<>();
+
+    private Set<RoleDto> roles = new HashSet<>();
 
 }
